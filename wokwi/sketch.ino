@@ -3,7 +3,7 @@
  * FarmTech Solutions - Fase 2 Cap 1
  * Sistema de Irrigacao Inteligente - Cultura: Soja
  * ==================================================================================
- * Versao: v2
+ * Versao: v3
  * Autor: Ronaldo Nishime
  *
  * Descricao:
@@ -12,16 +12,21 @@
  *   ou desligar a bomba de irrigacao (rele) com base em logica otimizada para
  *   a cultura da soja.
  *
+ *   Integracao Opcional 1: constante CHUVA_PREVISTA alimentada manualmente pelo
+ *   script Python (python/consulta_clima.py) que consulta API Open-Meteo. Se
+ *   chuva prevista, a bomba e bloqueada independente dos demais sensores.
+ *
  *   Feedback visual:
  *     - LCD 16x2 I2C: exibe valores dos sensores e estado da bomba
  *     - LEDs verdes (N, P, K): acendem conforme botao correspondente pressionado
  *     - LED amarelo (pH OK): acende quando pH esta na faixa ideal
  *     - LED vermelho (BOMBA): acende quando a bomba esta ligada
  *
- * Logica de decisao da bomba:
- *   - Umidade < 40%:                 bomba LIGA  (irrigacao necessaria)
- *   - Umidade > 70%:                 bomba DESLIGA (solo saturado)
- *   - Umidade entre 40% e 70%:       LIGA se pH ideal (5.5 a 6.3) E (P ou K presente)
+ * Logica de decisao da bomba (ordem de prioridade):
+ *   1. CHUVA_PREVISTA = true:        bomba DESLIGADA (bloqueio por previsao)
+ *   2. Umidade < 40%:                bomba LIGA  (irrigacao necessaria)
+ *   3. Umidade > 70%:                bomba DESLIGA (solo saturado)
+ *   4. Umidade entre 40% e 70%:      LIGA se pH ideal (5.5 a 6.3) E (P ou K presente)
  *                                    DESLIGA caso contrario
  *   - N e apenas monitorado (soja realiza Fixacao Biologica de Nitrogenio)
  *
@@ -63,6 +68,10 @@
 #define UMID_LIMITE_INF    40.0   // Abaixo disso: liga bomba
 #define UMID_LIMITE_SUP    70.0   // Acima disso: desliga bomba
 
+// ---------- Integracao com script Python (Opcional 1) ----------
+// Atualize manualmente o valor abaixo apos rodar o script consulta_clima.py
+#define CHUVA_PREVISTA     false   // Atualizado em 18/04/2026 17:46
+
 // ---------- Intervalos ----------
 #define INTERVALO_LEITURA_MS   2000   // Ciclo principal (minimo DHT22)
 #define INTERVALO_LCD_MS       3000   // Alterna entre tela 1 e tela 2
@@ -78,7 +87,7 @@ LiquidCrystal_I2C lcd(LCD_ADDR, LCD_COLS, LCD_ROWS);
 
 // ---------- Controle de alternancia de tela do LCD ----------
 unsigned long ultimaTrocaLCD = 0;
-int telaLCD = 0;  // 0 = tela sensores, 1 = tela bomba/NPK
+int telaLCD = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -87,33 +96,31 @@ void setup() {
   Serial.println("==================================================");
   Serial.println("FarmTech Solutions - Sistema de Irrigacao da Soja");
   Serial.println("==================================================");
+  Serial.print("CHUVA_PREVISTA (vinda do Python): ");
+  Serial.println(CHUVA_PREVISTA ? "SIM" : "nao");
+  Serial.println();
 
-  // Botoes com pull-up interno
   pinMode(PIN_BTN_N, INPUT_PULLUP);
   pinMode(PIN_BTN_P, INPUT_PULLUP);
   pinMode(PIN_BTN_K, INPUT_PULLUP);
 
-  // LEDs de status
   pinMode(PIN_LED_N, OUTPUT);
   pinMode(PIN_LED_P, OUTPUT);
   pinMode(PIN_LED_K, OUTPUT);
   pinMode(PIN_LED_PH_OK, OUTPUT);
 
-  // Rele (e LED vermelho compartilham o mesmo pino)
   pinMode(PIN_RELE_BOMBA, OUTPUT);
   digitalWrite(PIN_RELE_BOMBA, LOW);
 
-  // Inicializa sensor DHT
   dht.begin();
 
-  // Inicializa I2C e LCD
   Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
   lcd.init();
   lcd.backlight();
   lcd.setCursor(0, 0);
   lcd.print("FarmTech Soja");
   lcd.setCursor(0, 1);
-  lcd.print("Inicializando..");
+  lcd.print(CHUVA_PREVISTA ? "Chuva prevista!" : "Inicializando..");
   delay(1500);
   lcd.clear();
 
@@ -148,15 +155,23 @@ void loop() {
   bool ligarBomba = false;
   String justificativa = "";
 
-  if (umidade < UMID_LIMITE_INF) {
+  if (CHUVA_PREVISTA) {
+    // REGRA 1 (PRIORITARIA): bloqueio por previsao de chuva
+    ligarBomba = false;
+    justificativa = "CHUVA PREVISTA (dados OpenMeteo via Python): irrigacao bloqueada";
+  }
+  else if (umidade < UMID_LIMITE_INF) {
+    // REGRA 2: umidade baixa
     ligarBomba = true;
     justificativa = "Umidade baixa (< 40%): irrigacao necessaria";
   }
   else if (umidade > UMID_LIMITE_SUP) {
+    // REGRA 3: umidade alta
     ligarBomba = false;
     justificativa = "Umidade alta (> 70%): solo saturado";
   }
   else {
+    // REGRA 4: zona intermediaria, decisao composta
     bool temNutrienteCritico = (temP || temK);
     if (phIdeal && temNutrienteCritico) {
       ligarBomba = true;
@@ -186,7 +201,6 @@ void loop() {
   }
 
   if (telaLCD == 0) {
-    // Tela 1: umidade e pH
     lcd.setCursor(0, 0);
     lcd.print("Umidade: ");
     lcd.print(umidade, 1);
@@ -196,10 +210,13 @@ void loop() {
     lcd.print(ph, 2);
     lcd.print(phIdeal ? " [OK]" : " [!!]");
   } else {
-    // Tela 2: bomba e NPK
     lcd.setCursor(0, 0);
-    lcd.print("Bomba: ");
-    lcd.print(ligarBomba ? "LIGADA" : "desligada");
+    if (CHUVA_PREVISTA) {
+      lcd.print("BLOQ: Chuva!");
+    } else {
+      lcd.print("Bomba: ");
+      lcd.print(ligarBomba ? "LIGADA" : "desligada");
+    }
     lcd.setCursor(0, 1);
     lcd.print("N:");
     lcd.print(temN ? "1" : "0");
@@ -211,6 +228,7 @@ void loop() {
 
   // ---------- Saida no Monitor Serial ----------
   Serial.println("----------------------------------------");
+  Serial.print("Chuva prevista: "); Serial.println(CHUVA_PREVISTA ? "SIM (bloqueio ativo)" : "nao");
   Serial.print("Nitrogenio (N): "); Serial.println(temN ? "PRESENTE" : "ausente");
   Serial.print("Fosforo (P):    "); Serial.println(temP ? "PRESENTE" : "ausente");
   Serial.print("Potassio (K):   "); Serial.println(temK ? "PRESENTE" : "ausente");

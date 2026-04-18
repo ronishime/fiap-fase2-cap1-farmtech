@@ -3,13 +3,7 @@
   "author": "Ronaldo Nishime",
   "editor": "wokwi",
   "parts": [
-    {
-      "type": "board-esp32-devkit-v1",
-      "id": "esp",
-      "top": 0,
-      "left": 0,
-      "attrs": {}
-    },
+    { "type": "board-esp32-devkit-v1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
     {
       "type": "wokwi-pushbutton",
       "id": "btn_n",
@@ -113,20 +107,14 @@
       "id": "dht_umid",
       "top": 50,
       "left": 320,
-      "attrs": {}
+      "attrs": { "humidity": "55.5" }
     },
-    {
-      "type": "wokwi-relay-module",
-      "id": "rele_bomba",
-      "top": 380,
-      "left": 100,
-      "attrs": {}
-    },
+    { "type": "wokwi-relay-module", "id": "rele_bomba", "top": -172.6, "left": 86.4, "attrs": {} },
     {
       "type": "wokwi-lcd1602",
       "id": "lcd",
-      "top": -380,
-      "left": 50,
+      "top": 246.4,
+      "left": 130.4,
       "attrs": { "pins": "i2c" }
     }
   ],
