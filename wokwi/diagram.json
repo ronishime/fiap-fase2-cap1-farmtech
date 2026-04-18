@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "author": "Ronaldo Nishime",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-v1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_n",
+      "top": -150,
+      "left": -300,
+      "attrs": { "color": "green", "label": "N", "bounce": "false" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_p",
+      "top": -50,
+      "left": -300,
+      "attrs": { "color": "green", "label": "P", "bounce": "false" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_k",
+      "top": 50,
+      "left": -300,
+      "attrs": { "color": "green", "label": "K", "bounce": "false" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_n",
+      "top": -150,
+      "left": -180,
+      "attrs": { "color": "green", "label": "N" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_p",
+      "top": -50,
+      "left": -180,
+      "attrs": { "color": "green", "label": "P" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_k",
+      "top": 50,
+      "left": -180,
+      "attrs": { "color": "green", "label": "K" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_led_n",
+      "top": -140,
+      "left": -230,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_led_p",
+      "top": -40,
+      "left": -230,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_led_k",
+      "top": 60,
+      "left": -230,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_ph",
+      "top": 180,
+      "left": -180,
+      "attrs": { "color": "yellow", "label": "pH OK" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_led_ph",
+      "top": 190,
+      "left": -230,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_bomba",
+      "top": 300,
+      "left": -180,
+      "attrs": { "color": "red", "label": "BOMBA" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_led_bomba",
+      "top": 310,
+      "left": -230,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr_ph",
+      "top": -180,
+      "left": 280,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht_umid",
+      "top": 50,
+      "left": 320,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-relay-module",
+      "id": "rele_bomba",
+      "top": 380,
+      "left": 100,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd",
+      "top": -380,
+      "left": 50,
+      "attrs": { "pins": "i2c" }
+    }
+  ],
+  "connections": [
+    [ "btn_n:1.r", "esp:D18", "green", [ "v0" ] ],
+    [ "btn_n:2.r", "esp:GND.2", "black", [ "v0" ] ],
+    [ "btn_p:1.r", "esp:D19", "green", [ "v0" ] ],
+    [ "btn_p:2.r", "esp:GND.2", "black", [ "v0" ] ],
+    [ "btn_k:1.r", "esp:D5", "green", [ "v0" ] ],
+    [ "btn_k:2.r", "esp:GND.2", "black", [ "v0" ] ],
+    [ "r_led_n:1", "esp:D4", "green", [ "v0" ] ],
+    [ "r_led_n:2", "led_n:A", "green", [ "v0" ] ],
+    [ "led_n:C", "esp:GND.1", "black", [ "v0" ] ],
+    [ "r_led_p:1", "esp:D16", "green", [ "v0" ] ],
+    [ "r_led_p:2", "led_p:A", "green", [ "v0" ] ],
+    [ "led_p:C", "esp:GND.1", "black", [ "v0" ] ],
+    [ "r_led_k:1", "esp:D17", "green", [ "v0" ] ],
+    [ "r_led_k:2", "led_k:A", "green", [ "v0" ] ],
+    [ "led_k:C", "esp:GND.1", "black", [ "v0" ] ],
+    [ "r_led_ph:1", "esp:D25", "yellow", [ "v0" ] ],
+    [ "r_led_ph:2", "led_ph:A", "yellow", [ "v0" ] ],
+    [ "led_ph:C", "esp:GND.1", "black", [ "v0" ] ],
+    [ "r_led_bomba:1", "esp:D13", "red", [ "v0" ] ],
+    [ "r_led_bomba:2", "led_bomba:A", "red", [ "v0" ] ],
+    [ "led_bomba:C", "esp:GND.1", "black", [ "v0" ] ],
+    [ "ldr_ph:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "ldr_ph:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "ldr_ph:AO", "esp:D34", "yellow", [ "v0" ] ],
+    [ "dht_umid:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "dht_umid:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "dht_umid:SDA", "esp:D23", "blue", [ "v0" ] ],
+    [ "rele_bomba:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "rele_bomba:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "rele_bomba:IN", "esp:D13", "orange", [ "v0" ] ],
+    [ "lcd:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "lcd:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "lcd:SDA", "esp:D21", "blue", [ "v0" ] ],
+    [ "lcd:SCL", "esp:D22", "blue", [ "v0" ] ],
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ]
+  ],
+  "dependencies": {}
+}
