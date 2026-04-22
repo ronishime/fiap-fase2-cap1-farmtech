@@ -11,6 +11,12 @@ Projeto desenvolvido na disciplina de **IoT e Agricultura Digital** da FIAP, Fas
 - **Fase:** 2 - Capítulo 1
 - **Atividade:** Projeto 2 - Iniciando a coleta de dados
 
+## Vídeo de demonstração
+
+O vídeo abaixo demonstra o funcionamento completo do sistema, incluindo a consulta climatológica via Python, a lógica de decisão no ESP32 e os três cenários principais de acionamento da bomba.
+
+**Link do vídeo:** https://youtu.be/Nb3GyiMSb8Q
+
 ## Visão geral
 
 O sistema simula um dispositivo de agricultura de precisão instalado em uma lavoura de soja. Ele lê sensores de nutrientes (N, P, K), pH do solo, umidade do solo, e decide ligar ou desligar uma bomba de irrigação conforme regras baseadas nas faixas ideais da cultura da soja, definidas pela EMBRAPA.
